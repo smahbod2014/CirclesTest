@@ -12,16 +12,18 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
+import com.esotericsoftware.kryonet.Client;
 
 public class CirclesTest extends ApplicationAdapter {
+	public static final String HOST = "localhost";
 	static Array<TextPlaceholder> textsToRender = new Array<TextPlaceholder>();
 	static GlyphLayout glyphLayout = new GlyphLayout();
 	static BitmapFont font;
+	static OrthographicCamera viewCamera;
+	static Client client;
 
 	SpriteBatch spriteBatch;
 	ShapeRenderer shapeRenderer;
-	OrthographicCamera viewCamera;
-	Game game;
 
 	@Override
 	public void create () {
@@ -32,7 +34,6 @@ public class CirclesTest extends ApplicationAdapter {
 		spriteBatch = new SpriteBatch();
 		shapeRenderer.setProjectionMatrix(viewCamera.combined);
 		spriteBatch.setProjectionMatrix(viewCamera.combined);
-		game = new Game();
 
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("ninja-naruto.regular.ttf"));
 		FreeTypeFontGenerator.FreeTypeFontParameter params = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -42,6 +43,14 @@ public class CirclesTest extends ApplicationAdapter {
 		params.minFilter = Texture.TextureFilter.Linear;
 		font = generator.generateFont(params);
 		generator.dispose();
+
+		client = new Client();
+		Messages.registerMessages(client);
+		client.start();
+
+		StateManager.addState("login", new LoginScreen());
+		StateManager.addState("game", new Game());
+		StateManager.setState("login");
 	}
 
 	@Override
@@ -50,10 +59,9 @@ public class CirclesTest extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		float dt = Gdx.graphics.getDeltaTime();
-		game.input(dt);
-		game.update(dt);
+		StateManager.update(dt);
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-		game.render(shapeRenderer);
+		StateManager.render(shapeRenderer);
 		shapeRenderer.end();
 
 		if (textsToRender.size > 0) {

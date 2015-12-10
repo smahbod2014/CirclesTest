@@ -6,7 +6,6 @@ import java.util.Date;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
-import com.koda.circlestest.Messages.NewPlayerMessage;
 
 /**
  * Created by Sean on 12/6/2015.
@@ -23,6 +22,7 @@ public class ServerRunner extends Listener {
     }
 
     public ServerRunner() {
+        UserDatabase.readFromFile();
         initializeServer();
         start();
     }
@@ -78,7 +78,7 @@ public class ServerRunner extends Listener {
         // System.out.println("Received a new connection");
         
 //        System.out.println("Sending welcome message");
-        connection.sendTCP(new Messages.SampleMessage("It's currently " + new Date().toString()));
+        connection.sendTCP(new Messages.WelcomeMessage("It's currently " + new Date().toString()));
     }
 
     @Override
@@ -129,6 +129,25 @@ public class ServerRunner extends Listener {
 
             // tell everyone else
             server.sendToAllExceptTCP(m.id, m);
+        }
+        else if (object instanceof Messages.RegistrationMessage) {
+            Messages.RegistrationMessage m = (Messages.RegistrationMessage) object;
+            Messages.RegistrationResponse r = new Messages.RegistrationResponse();
+            if (UserDatabase.userExists(m.username)) {
+                r.resultCode = Messages.RegistrationResponse.RESULT_USER_EXISTS;
+            }
+            else {
+                r.resultCode = Messages.RegistrationResponse.RESULT_ACCEPTED;
+                UserDatabase.addUser(m.username, m.password);
+                UserDatabase.writeToFile();
+            }
+            connection.sendTCP(r);
+        }
+        else if (object instanceof Messages.LoginMessage) {
+            Messages.LoginMessage m = (Messages.LoginMessage) object;
+            Messages.LoginResponse r = new Messages.LoginResponse();
+            r.resultCode = UserDatabase.authenticate(m.username, m.password);
+            connection.sendTCP(r);
         }
     }
 }

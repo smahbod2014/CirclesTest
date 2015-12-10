@@ -15,15 +15,19 @@ public class Messages {
         kryo.register(NewPlayerMessage.class);
         kryo.register(PositionUpdateMessage.class);
         kryo.register(DisconnectMessage.class);
-        kryo.register(SampleMessage.class);
+        kryo.register(WelcomeMessage.class);
+        kryo.register(RegistrationMessage.class);
+        kryo.register(RegistrationResponse.class);
+        kryo.register(LoginMessage.class);
+        kryo.register(LoginResponse.class);
     }
     
-    public static class SampleMessage {
+    public static class WelcomeMessage {
     	String text;
-    	public SampleMessage(String text) {
+    	public WelcomeMessage(String text) {
     		this.text = text;
     	}
-    	public SampleMessage() {}
+    	public WelcomeMessage() {}
     }
 
     public static class NewPlayerMessage {
@@ -68,5 +72,58 @@ public class Messages {
         }
         
         public PositionUpdateMessage() {}
+    }
+
+    public static class RegistrationMessage {
+        public static int RESULT_ACCEPTED = 1;
+        public static int RESULT_USER_EXISTS = 2;
+        public String username;
+        public String password;
+        public int resultCode;
+
+        public RegistrationMessage(String username, String password) {
+            this.username = username;
+            this.password = password;
+        }
+
+        public RegistrationMessage() {}
+    }
+
+    public static class RegistrationResponse {
+        public static int RESULT_ACCEPTED = 1;
+        public static int RESULT_USER_EXISTS = 2;
+        public int resultCode;
+
+        public RegistrationResponse(int resultCode) {
+            this.resultCode = resultCode;
+        }
+
+        public RegistrationResponse() {}
+    }
+
+    public static class LoginMessage {
+        public String username;
+        public String password;
+
+        public LoginMessage(String username, String password) {
+            this.username = username;
+            this.password = password;
+        }
+
+        public LoginMessage() {}
+    }
+
+    public static class LoginResponse {
+        public static int RESULT_ACCEPTED = 1;
+        public static int RESULT_BAD_USERNAME = 2;
+        public static int RESULT_BAD_PASSWORD = 3;
+        public static int RESULT_OTHER_USER_LOGGED_IN = 4;
+        public int resultCode;
+
+        public LoginResponse(int resultCode) {
+            this.resultCode = resultCode;
+        }
+
+        public LoginResponse() {}
     }
 }
